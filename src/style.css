@@ -1,0 +1,82 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  color-scheme: light dark;
+  font-family: monospace;
+  font-size: 13px;
+}
+
+#app {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  height: 100vh;
+  overflow: hidden;
+}
+
+aside {
+  overflow-y: auto;
+  border-right: 1px solid #ccc;
+  padding: 8px 0;
+}
+aside ul { list-style: none; padding: 0; }
+aside li ul { padding-left: 12px; }
+aside span {
+  display: block;
+  padding: 2px 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+aside span:hover { background: rgba(128,128,128,0.15); }
+
+.hint { padding: 8px; opacity: 0.5; }
+.hidden { display: none; }
+.dirty { color: #e8a84e; }
+
+/* Pane */
+.pane { display: flex; flex-direction: column; overflow: hidden; }
+.pane > div:not(.tabs) { flex: 1; overflow: hidden; }
+
+/* Tabs */
+.tabs { display: flex; border-bottom: 1px solid #ccc; flex-shrink: 0; }
+.tabs button {
+  background: none;
+  border: none;
+  padding: 4px 14px;
+  cursor: pointer;
+  opacity: 0.5;
+  font: inherit;
+}
+.tabs button.active { opacity: 1; border-bottom: 2px solid currentColor; }
+
+/* Editor */
+.editor-wrap { display: flex; flex-direction: column; height: 100%; }
+.editor { flex: 1; overflow: auto; min-height: 0; }
+.editor .cm-editor { height: 100%; font-family: monospace; font-size: 13px; }
+.editor .cm-scroller { overflow: auto; }
+
+.reload-banner {
+  padding: 4px 10px;
+  background: rgba(234,179,8,0.15);
+  border-bottom: 1px solid rgba(234,179,8,0.4);
+  flex-shrink: 0;
+}
+.reload-banner button {
+  margin-left: 8px;
+  background: none;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  padding: 0 6px;
+  cursor: pointer;
+  font: inherit;
+}
+
+/* Diff */
+.diff-pane { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+.diff-content { flex: 1; overflow: auto; }
+pre.diff { padding: 8px 0; }
+pre.diff div { padding: 0 8px; white-space: pre; }
+pre.diff .add { background: rgba(0,180,0,0.15); color: #1a7f1a; }
+pre.diff .del { background: rgba(220,0,0,0.12); color: #b91c1c; }
+pre.diff .hunk { color: #6b7280; }
