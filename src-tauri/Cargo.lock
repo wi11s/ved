@@ -336,11 +336,9 @@ dependencies = [
 name = "companion-ide"
 version = "0.1.0"
 dependencies = [
- "anyhow",
  "ignore",
  "notify",
  "serde",
- "serde_json",
  "tauri",
  "tauri-build",
 ]

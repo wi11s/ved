@@ -1,8 +1,6 @@
 import { createEffect, createSignal, onCleanup, onMount, Show } from "solid-js";
 import { EditorView, minimalSetup } from "codemirror";
-import { keymap } from "@codemirror/view";
 import { EditorState } from "@codemirror/state";
-import { defaultKeymap } from "@codemirror/commands";
 import { LanguageDescription } from "@codemirror/language";
 import { languages } from "@codemirror/language-data";
 import { invoke } from "@tauri-apps/api/core";
@@ -51,7 +49,6 @@ export function Editor(props: { file: string | null }) {
             minimalSetup,
             langExt,
             EditorView.lineWrapping,
-            keymap.of(defaultKeymap),
             EditorView.updateListener.of((update) => {
               if (!update.docChanged) return;
               clearTimeout(saveTimer);
