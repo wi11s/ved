@@ -55,6 +55,34 @@ aside span:hover { background: rgba(128,128,128,0.15); }
 .editor { flex: 1; overflow: auto; min-height: 0; }
 .editor .cm-editor { height: 100%; font-family: monospace; font-size: 13px; }
 .editor .cm-scroller { overflow: auto; }
+/* Editor line numbers: make gutter darker to match diff */
+.editor .cm-gutters {
+  background: rgba(0,0,0,0.08);
+  color: #374151;
+  border-right: 1px solid rgba(0,0,0,0.1);
+}
+.editor .cm-gutterElement { padding: 0 6px; }
+/* Active line and gutter to improve cursor location visibility */
+.editor .cm-activeLine { background: rgba(59,130,246,0.12); }
+/* Keep active gutter high-contrast in light and dark modes */
+.editor .cm-activeLineGutter {
+  background: rgba(59,130,246,0.14);
+  color: inherit; /* don't override theme color to avoid low contrast */
+  font-weight: 600;
+}
+/* Ensure caret is visible */
+.editor .cm-content { caret-color: currentColor; }
+.editor .cm-cursor { border-left-color: currentColor; }
+
+/* Merge view highlights in single editor */
+.cm-line-add { background: rgba(0,180,0,0.15); }
+.cm-del-block {
+  background: rgba(220,0,0,0.12);
+  color: #b91c1c;
+  margin: 0;
+  padding: 0 8px;
+  white-space: pre-wrap;
+}
 
 .reload-banner {
   padding: 4px 10px;
@@ -72,11 +100,4 @@ aside span:hover { background: rgba(128,128,128,0.15); }
   font: inherit;
 }
 
-/* Diff */
-.diff-pane { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
-.diff-content { flex: 1; overflow: auto; }
-pre.diff { padding: 8px 0; }
-pre.diff div { padding: 0 8px; white-space: pre; }
-pre.diff .add { background: rgba(0,180,0,0.15); color: #1a7f1a; }
-pre.diff .del { background: rgba(220,0,0,0.12); color: #b91c1c; }
-pre.diff .hunk { color: #6b7280; }
+/* (old Diff view styles removed in favor of unified editor) */

@@ -35,6 +35,33 @@ pub fn git_diff(root: String, path: String, ref1: String, ref2: String) -> Resul
 }
 
 #[tauri::command]
+pub fn git_show_file(root: String, path: String, r#ref: String) -> Result<String, String> {
+    if !is_git_repo(&root) {
+        return Err("not a git repository".into());
+    }
+    if !has_commits(&root) {
+        return Err("repository has no commits".into());
+    }
+
+    let rel = match Path::new(&path).strip_prefix(&root) {
+        Ok(p) => p.to_string_lossy().into_owned(),
+        Err(_) => path.clone(),
+    };
+
+    let spec = format!("{}:{}", r#ref, rel);
+    let output = Command::new("git")
+        .args(["-C", &root, "show", &spec])
+        .output()
+        .map_err(|e| e.to_string())?;
+
+    if output.status.success() {
+        Ok(String::from_utf8_lossy(&output.stdout).into_owned())
+    } else {
+        Err(String::from_utf8_lossy(&output.stderr).into_owned())
+    }
+}
+
+#[tauri::command]
 pub fn git_status(root: String) -> Result<Vec<String>, String> {
     if !is_git_repo(&root) {
         return Ok(vec![]);
