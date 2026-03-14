@@ -7,6 +7,7 @@ type Props = {
   root: string | null;
   dirtyFiles: Set<string>;
   onSelect: (path: string) => void;
+  selectedPath?: string | null;
 };
 
 export function Sidebar(props: Props) {
@@ -21,7 +22,7 @@ export function Sidebar(props: Props) {
         <ul>
           <For each={nodes() ?? []}>
             {(node) => (
-              <TreeNode node={node} dirtyFiles={props.dirtyFiles} onSelect={props.onSelect} />
+              <TreeNode node={node} dirtyFiles={props.dirtyFiles} onSelect={props.onSelect} selectedPath={props.selectedPath} />
             )}
           </For>
         </ul>
@@ -48,6 +49,7 @@ function TreeNode(props: {
   node: FileNode;
   dirtyFiles: Set<string>;
   onSelect: (path: string) => void;
+  selectedPath?: string | null;
 }) {
   const [open, setOpen] = createSignal(false);
   const [children] = createResource(
@@ -59,7 +61,10 @@ function TreeNode(props: {
     <li>
       <span
         class={props.node.is_dir ? "dir" : "file"}
-        classList={{ dirty: isDirty(props.node.path, props.dirtyFiles) }}
+        classList={{
+          dirty: isDirty(props.node.path, props.dirtyFiles),
+          selected: !props.node.is_dir && props.node.path === props.selectedPath,
+        }}
         onClick={() => {
           if (props.node.is_dir) setOpen((o) => !o);
           else props.onSelect(props.node.path);
@@ -72,7 +77,7 @@ function TreeNode(props: {
         <ul>
           <For each={children() ?? []}>
             {(child) => (
-              <TreeNode node={child} dirtyFiles={props.dirtyFiles} onSelect={props.onSelect} />
+              <TreeNode node={child} dirtyFiles={props.dirtyFiles} onSelect={props.onSelect} selectedPath={props.selectedPath} />
             )}
           </For>
         </ul>

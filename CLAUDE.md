@@ -1,4 +1,4 @@
-# Companion IDE
+# VSE — Versioned Source Explorer
 
 A read-first desktop app to sit alongside Claude Code / Codex CLI. Review diffs, read code, make small edits — nothing more.
 

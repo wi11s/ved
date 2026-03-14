@@ -3,6 +3,8 @@ mod git;
 mod watch;
 
 use std::sync::Mutex;
+use tauri::menu::{Menu, MenuItem, Submenu};
+use tauri::Emitter;
 
 pub struct RootPath(pub Mutex<Option<String>>);
 
@@ -20,6 +22,19 @@ pub fn run() {
     tauri::Builder::default()
         .manage(RootPath(Mutex::new(root)))
         .setup(move |app| {
+            // Build application menu with a View -> Toggle Theme item
+            let toggle = MenuItem::with_id(app, "toggle-theme", "Toggle Theme", true, Some("CmdOrCtrl+Shift+L"))?;
+            let view = Submenu::with_items(app, "View", true, &[&toggle])?;
+            let menu = Menu::with_items(app, &[&view])?;
+            app.set_menu(menu)?;
+
+            let app_handle = app.handle().clone();
+            app.on_menu_event(move |app, event| {
+                if event.id() == "toggle-theme" {
+                    let _ = app.emit("toggle-theme", ());
+                }
+            });
+
             if let Some(r) = root_for_watcher {
                 watch::start(r, app.handle().clone());
             }

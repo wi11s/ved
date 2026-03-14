@@ -1,6 +1,6 @@
-# Companion IDE
+# VSE — Versioned Source Explorer
 
-A lightweight desktop app designed to sit alongside terminal AI editors (Claude Code, Codex CLI, etc.). Read code, review diffs, make small edits — nothing more.
+A lightweight desktop app to explore, review, and lightly edit code. Great alongside terminal-first AI editors (Claude Code, Codex CLI, etc.). Read code, review diffs, make small edits — nothing more.
 
 **Read-first.** The UI prioritizes clarity over features. AI does the heavy lifting; this is the review layer.
 
@@ -10,21 +10,21 @@ A lightweight desktop app designed to sit alongside terminal AI editors (Claude 
 
 **Editor** — syntax-highlighted, inline editing, soft wrap toggle, jump to line, Cmd+S to save; no autocomplete, no LSP
 
-**Diff viewer** — working tree vs HEAD, or any two arbitrary refs; color-coded, view only, no merge resolution
+**Inline diff** — single-pane editor with inline highlights (adds/deletes) vs HEAD; view changes while editing
 
 ## Usage
 
 ```sh
-ide .          # open current directory
-ide ~/my/repo  # open any path
+vse .          # open current directory
+vse ~/my/repo  # open any path
 ```
 
 | Action | How |
 |---|---|
-| View a diff | Click changed file → Diff tab |
-| Switch commits | Dropdown to select any two refs |
-| Make a small edit | Click into editor, type, Cmd+S |
-| Reload from disk | Auto-detects external changes and prompts |
+| Toggle theme | View → Toggle Theme (Cmd/Ctrl+Shift+L) |
+| Make a small edit | Click into editor; autosaves |
+| See changes inline | Adds/Deletes highlighted relative to HEAD |
+| Reload from disk | Automatic; prompts only for true external edits |
 
 ## Out of Scope
 
@@ -57,8 +57,7 @@ ide/
 │   └── Cargo.toml
 ├── src/                # Frontend (Solid.js + CodeMirror)
 │   ├── main.tsx
-│   ├── Editor.tsx      # CodeMirror wrapper
-│   ├── Diff.tsx        # Diff viewer
+│   ├── Editor.tsx      # Unified editor with inline diff
 │   ├── Sidebar.tsx     # File tree
 │   └── style.css
 ├── CLAUDE.md

@@ -1,11 +1,11 @@
 [package]
-name = "companion-ide"
+name = "vse"
 version = "0.1.0"
-description = "Companion IDE"
+description = "VSE — Versioned Source Explorer"
 edition = "2021"
 
 [lib]
-name = "companion_ide_lib"
+name = "vse_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
@@ -16,4 +16,3 @@ tauri = { version = "2", features = [] }
 serde = { version = "1", features = ["derive"] }
 notify = "6"
 ignore = "0.4"
-
