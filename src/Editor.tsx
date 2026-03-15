@@ -74,7 +74,8 @@ export function Editor(props: Props) {
     const unlisten = await listen<string[]>("file-changed", (event) => {
       if (props.file && event.payload.includes(props.file)) {
         if (Date.now() < suppressExternalUntil) return;
-        setOutdated(true);
+        // Auto-reload editor content when external change detected
+        setReloadTick((t) => t + 1);
       }
     });
     onCleanup(unlisten);
@@ -212,11 +213,7 @@ export function Editor(props: Props) {
 
   return (
     <div class="editor-wrap">
-      <Show when={outdated()}>
-        <div class="reload-banner">
-          File changed externally. <button onClick={() => setReloadTick((t) => t + 1)}>Reload</button>
-        </div>
-      </Show>
+      {/* Auto-reload enabled; banner removed */}
       <div ref={container} class="editor" />
     </div>
   );

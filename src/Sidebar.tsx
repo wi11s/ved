@@ -1,6 +1,6 @@
-import { createMemo, createResource, createSignal, For, Show } from "solid-js";
+import { createMemo, createResource, createSignal, For, Show, onCleanup, onMount } from "solid-js";
 import { invoke } from "@tauri-apps/api/core";
-import { emit } from "@tauri-apps/api/event";
+import { emit, listen } from "@tauri-apps/api/event";
 
 type FileNode = { name: string; path: string; is_dir: boolean };
 
@@ -15,10 +15,20 @@ type Props = {
 
 export function Sidebar(props: Props) {
   const [filterChanged, setFilterChanged] = createSignal(false);
-  const [nodes] = createResource(
+  const [refreshTick, setRefreshTick] = createSignal(0);
+  const [nodes, { refetch: refetchRoot }] = createResource(
     () => props.root ?? undefined,
     (path) => invoke<FileNode[]>("read_dir", { path })
   );
+
+  onMount(async () => {
+    const unlisten = await listen("file-changed", () => {
+      // Refetch the root listing and bump tick so open subtrees refetch
+      refetchRoot();
+      setRefreshTick((t) => t + 1);
+    });
+    onCleanup(unlisten);
+  });
 
   const changedList = createMemo(() => {
     const set = props.dirtyFiles;
@@ -64,6 +74,7 @@ export function Sidebar(props: Props) {
                   dirtyFiles={props.dirtyFiles}
                   createdFiles={props.createdFiles}
                   removedFiles={props.removedFiles}
+                  refreshTick={refreshTick()}
                   onSelect={props.onSelect}
                   selectedPath={props.selectedPath}
                 />
@@ -123,13 +134,14 @@ function TreeNode(props: {
   dirtyFiles: Set<string>;
   createdFiles: Set<string>;
   removedFiles: Set<string>;
+  refreshTick: number;
   onSelect: (path: string) => void;
   selectedPath?: string | null;
 }) {
   const [open, setOpen] = createSignal(false);
   const [children] = createResource(
-    () => (props.node.is_dir && open() ? props.node.path : undefined),
-    (path) => invoke<FileNode[]>("read_dir", { path })
+    () => (props.node.is_dir && open() ? `${props.node.path}:${props.refreshTick}` : undefined),
+    (key) => invoke<FileNode[]>("read_dir", { path: key!.split(":")[0] })
   );
 
   return (
@@ -159,6 +171,7 @@ function TreeNode(props: {
                 dirtyFiles={props.dirtyFiles}
                 createdFiles={props.createdFiles}
                 removedFiles={props.removedFiles}
+                refreshTick={props.refreshTick}
                 onSelect={props.onSelect}
                 selectedPath={props.selectedPath}
               />
