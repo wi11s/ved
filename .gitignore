@@ -8,3 +8,6 @@
 
 # other
 /node_modules/
+
+# dist
+# /dist/
