@@ -79,3 +79,31 @@ pub fn git_status(root: String) -> Result<Vec<String>, String> {
         })
         .collect())
 }
+
+#[derive(serde::Serialize)]
+pub struct StatusEntry {
+    pub path: String,
+    pub code: String, // two-character porcelain code (e.g. "??", "A ", " D")
+}
+
+#[tauri::command]
+pub fn git_status_detailed(root: String) -> Result<Vec<StatusEntry>, String> {
+    if !is_git_repo(&root) {
+        return Ok(vec![]);
+    }
+    let output = Command::new("git")
+        .args(["-C", &root, "status", "--porcelain"])
+        .output()
+        .map_err(|e| e.to_string())?;
+    let entries = String::from_utf8_lossy(&output.stdout)
+        .lines()
+        .filter(|l| l.len() > 3)
+        .map(|l| {
+            let code = l[0..2].to_string();
+            let rel = l[3..].trim().trim_matches('"');
+            let path = Path::new(&root).join(rel).to_string_lossy().into_owned();
+            StatusEntry { path, code }
+        })
+        .collect();
+    Ok(entries)
+}

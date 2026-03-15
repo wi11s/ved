@@ -6,6 +6,8 @@ type FileNode = { name: string; path: string; is_dir: boolean };
 type Props = {
   root: string | null;
   dirtyFiles: Set<string>;
+  createdFiles: Set<string>;
+  removedFiles: Set<string>;
   onSelect: (path: string) => void;
   selectedPath?: string | null;
 };
@@ -22,7 +24,14 @@ export function Sidebar(props: Props) {
         <ul>
           <For each={nodes() ?? []}>
             {(node) => (
-              <TreeNode node={node} dirtyFiles={props.dirtyFiles} onSelect={props.onSelect} selectedPath={props.selectedPath} />
+              <TreeNode
+                node={node}
+                dirtyFiles={props.dirtyFiles}
+                createdFiles={props.createdFiles}
+                removedFiles={props.removedFiles}
+                onSelect={props.onSelect}
+                selectedPath={props.selectedPath}
+              />
             )}
           </For>
         </ul>
@@ -48,6 +57,8 @@ function isDirty(path: string, dirtyFiles: Set<string>): boolean {
 function TreeNode(props: {
   node: FileNode;
   dirtyFiles: Set<string>;
+  createdFiles: Set<string>;
+  removedFiles: Set<string>;
   onSelect: (path: string) => void;
   selectedPath?: string | null;
 }) {
@@ -63,6 +74,8 @@ function TreeNode(props: {
         class={props.node.is_dir ? "dir" : "file"}
         classList={{
           dirty: isDirty(props.node.path, props.dirtyFiles),
+          created: !props.node.is_dir && props.createdFiles.has(props.node.path),
+          removed: !props.node.is_dir && props.removedFiles.has(props.node.path),
           selected: !props.node.is_dir && props.node.path === props.selectedPath,
         }}
         onClick={() => {
@@ -77,7 +90,14 @@ function TreeNode(props: {
         <ul>
           <For each={children() ?? []}>
             {(child) => (
-              <TreeNode node={child} dirtyFiles={props.dirtyFiles} onSelect={props.onSelect} selectedPath={props.selectedPath} />
+              <TreeNode
+                node={child}
+                dirtyFiles={props.dirtyFiles}
+                createdFiles={props.createdFiles}
+                removedFiles={props.removedFiles}
+                onSelect={props.onSelect}
+                selectedPath={props.selectedPath}
+              />
             )}
           </For>
         </ul>

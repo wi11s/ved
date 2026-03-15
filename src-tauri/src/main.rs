@@ -43,7 +43,7 @@ fn main() {
         })
         .invoke_handler(tauri::generate_handler![
             fs::get_root, fs::read_dir, fs::read_file, fs::write_file,
-            git::git_diff, git::git_show_file, git::git_status,
+            git::git_diff, git::git_show_file, git::git_status, git::git_status_detailed,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

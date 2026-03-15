@@ -9,11 +9,14 @@ import "./style.css";
 
 function App() {
   const [root] = createResource(() => invoke<string | null>("get_root"));
-  const [dirty, { refetch: refetchDirty }] = createResource(
+  type StatusEntry = { path: string; code: string };
+  const [status, { refetch: refetchStatus }] = createResource(
     () => root() ?? undefined,
-    (r) => invoke<string[]>("git_status", { root: r }).catch(() => [] as string[])
+    (r) => invoke<StatusEntry[]>("git_status_detailed", { root: r }).catch(() => [] as StatusEntry[])
   );
-  const dirtySet = createMemo(() => new Set(dirty() ?? []));
+  const dirtySet = createMemo(() => new Set((status() ?? []).map(s => s.path)));
+  const createdSet = createMemo(() => new Set((status() ?? []).filter(s => s.code === "??" || s.code.includes("A")).map(s => s.path)));
+  const removedSet = createMemo(() => new Set((status() ?? []).filter(s => s.code.includes("D")).map(s => s.path)));
 
   const [file, setFile] = createSignal<string | null>(null);
   const [theme, setTheme] = createSignal<"light" | "dark">("dark");
@@ -29,7 +32,7 @@ function App() {
     let timer: ReturnType<typeof setTimeout> | undefined;
     const unlisten = await listen("file-changed", () => {
       clearTimeout(timer);
-      timer = setTimeout(() => refetchDirty(), 300);
+      timer = setTimeout(() => refetchStatus(), 300);
     });
     const unlistenToggle = await listen("toggle-theme", () => {
       setTheme((t) => (t === "light" ? "dark" : "light"));
@@ -56,7 +59,14 @@ function App() {
 
   return (
     <div id="app">
-      <Sidebar root={root() ?? null} dirtyFiles={dirtySet()} onSelect={onSelect} selectedPath={file()} />
+      <Sidebar
+        root={root() ?? null}
+        dirtyFiles={dirtySet()}
+        createdFiles={createdSet()}
+        removedFiles={removedSet()}
+        onSelect={onSelect}
+        selectedPath={file()}
+      />
       <div class="pane">
         <Editor file={file()} root={root() ?? null} />
       </div>

@@ -109,6 +109,9 @@ aside span {
 }
 aside span:hover { background: var(--hover); }
 aside span.selected { background: var(--active-line-bg); }
+/* Git status coloring for files */
+aside span.file.created { color: var(--add-fg); }
+aside span.file.removed { color: var(--del-fg); text-decoration: line-through; }
 
 .hint { padding: 8px; opacity: 0.72; color: var(--muted); }
 .hidden { display: none; }
