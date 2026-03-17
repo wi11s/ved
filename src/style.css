@@ -113,6 +113,21 @@ aside span:hover { background: var(--hover); }
 aside span.selected { background: var(--active-line-bg); }
 /* Scroll area for tree/list */
 aside > ul { overflow-y: auto; flex: 1; }
+/* Search */
+.search-bar { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-top: 1px solid var(--border); }
+.search-bar input[type="text"], .search-bar .cm-textfield {
+  width: 100%;
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid var(--border);
+  padding: 4px 6px;
+  border-radius: 2px;
+}
+.search-status { font-size: 12px; opacity: 0.7; white-space: nowrap; }
+.search-results { list-style: none; margin: 0; padding: 0; overflow-y: auto; flex: 1; }
+.search-results .file { display: block; padding: 4px 8px; border-radius: 2px; }
+.search-results .file:hover { background: var(--hover); }
+.search-results .preview { font-size: 12px; opacity: 0.8; margin-top: 2px; }
 /* Footer */
 .sidebar-footer {
   display: flex;
@@ -142,21 +157,31 @@ aside span.file.removed { color: var(--del-fg); text-decoration: line-through; }
 .pane { display: flex; flex-direction: column; overflow: hidden; }
 .pane > div:not(.tabs) { flex: 1; overflow: hidden; }
 
-/* Tabs */
-.tabs { display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-.tabs button {
-  background: none;
-  border: none;
-  padding: 4px 14px;
-  cursor: pointer;
-  opacity: 0.5;
-  font: inherit;
-}
-.tabs button.active { opacity: 1; border-bottom: 2px solid currentColor; }
-
 /* Editor */
-.editor-wrap { display: flex; flex-direction: column; height: 100%; }
+.editor-wrap { display: flex; flex-direction: column; height: 100%; position: relative; }
 .editor { flex: 1; overflow: auto; min-height: 0; }
+
+/* Find bar */
+.find-bar { position: absolute; top: 8px; right: 8px; z-index: 10; display: flex; align-items: center; gap: 4px; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 4px 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+.find-bar input { background: transparent; color: var(--fg); border: 1px solid var(--border); border-radius: 2px; padding: 0 6px; height: 24px; width: 180px; outline: none; box-sizing: border-box; font-size: 12px; }
+.find-bar input::placeholder { color: var(--muted); opacity: 0.8; }
+.find-count { font-size: 11px; color: var(--muted); min-width: 44px; text-align: center; }
+.find-bar button { background: none; color: var(--fg); border: 1px solid var(--border); border-radius: 2px; padding: 0; cursor: pointer; height: 24px; width: 26px; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; }
+.find-bar button:hover { background: var(--hover); }
+.find-bar .find-close { margin-left: 2px; color: var(--muted); border-color: transparent; }
+.find-bar .find-close:hover { color: var(--fg); border-color: var(--border); }
+.cm-find-match { background: rgba(234,179,8,0.28); outline: 1px solid rgba(234,179,8,0.45); border-radius: 2px; }
+
+/* Hover definition popup */
+.hover-popup { position: fixed; z-index: 50; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); min-width: 220px; max-width: 480px; max-height: 280px; overflow-y: auto; font-size: 12px; top: 0; left: 0; }
+.hover-row { padding: 5px 10px; overflow: hidden; }
+.hover-result { cursor: pointer; display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.hover-result:hover { background: var(--hover); }
+.hover-location { display: flex; align-items: baseline; gap: 1px; min-width: 0; }
+.hover-path { color: var(--fg); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.hover-line { color: var(--muted); flex-shrink: 0; }
+.hover-preview { color: var(--muted); font-family: monospace; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.hover-loading, .hover-empty { color: var(--muted); font-style: italic; }
 .editor .cm-editor { height: 100%; font-family: monospace; font-size: 13px; }
 .editor .cm-scroller { overflow: auto; }
 /* Editor line numbers: make gutter darker to match diff */
@@ -169,6 +194,7 @@ aside span.file.removed { color: var(--del-fg); text-decoration: line-through; }
 /* Ensure caret is visible */
 .editor .cm-content { caret-color: currentColor; color: var(--fg); }
 .editor .cm-cursor { border-left-color: currentColor; }
+
 
 /* Merge view highlights in single editor */
 .cm-line-add { background: var(--add-bg); color: var(--fg); }
@@ -190,16 +216,5 @@ aside span.file.removed { color: var(--del-fg); text-decoration: line-through; }
 .editor .tok-operator { color: var(--syn-operator); }
 .editor .tok-heading { color: var(--syn-tag); }
 .editor .tok-labelName { color: var(--syn-attr); }
-
-.reload-banner { padding: 4px 10px; background: var(--warn-bg); border-bottom: 1px solid var(--warn-border); flex-shrink: 0; }
-.reload-banner button {
-  margin-left: 8px;
-  background: none;
-  border: 1px solid currentColor;
-  border-radius: 3px;
-  padding: 0 6px;
-  cursor: pointer;
-  font: inherit;
-}
 
 /* (old Diff view styles removed in favor of unified editor) */

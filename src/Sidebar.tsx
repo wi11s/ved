@@ -15,6 +15,10 @@ type Props = {
 
 export function Sidebar(props: Props) {
   const [filterChanged, setFilterChanged] = createSignal(false);
+  const [searchMode, setSearchMode] = createSignal(false);
+  const [searchQuery, setSearchQuery] = createSignal("");
+  const [searching, setSearching] = createSignal(false);
+  const [results, setResults] = createSignal<Array<{ path: string; line?: number; col?: number; preview?: string }>>([]);
   const [refreshTick, setRefreshTick] = createSignal(0);
   const [nodes, { refetch: refetchRoot }] = createResource(
     () => props.root ?? undefined,
@@ -43,6 +47,29 @@ export function Sidebar(props: Props) {
   return (
     <aside>
       <Show when={props.root} fallback={<p class="hint">Run: ide &lt;path&gt;</p>}>
+        <Show when={searchMode()}>
+          <ul class="search-results">
+            <For each={results()}>
+              {(hit) => {
+                const rel = (props.root && hit.path.startsWith(props.root + "/")) ? hit.path.slice((props.root + "/").length) : hit.path;
+                const title = hit.line ? `${rel}:${hit.line}` : rel;
+                return (
+                  <li>
+                    <span class="file" title={title}
+                      onClick={async () => {
+                        await emit("open-file", { path: hit.path, line: hit.line, col: hit.col || 1 });
+                      }}
+                    >
+                      {title}
+                      <Show when={hit.preview}><div class="preview">{hit.preview}</div></Show>
+                    </span>
+                  </li>
+                );
+              }}
+            </For>
+          </ul>
+        </Show>
+        <Show when={!searchMode()}>
         <Show when={!filterChanged()} fallback={
           <ul>
             <For each={changedList()}>
@@ -82,6 +109,29 @@ export function Sidebar(props: Props) {
             </For>
           </ul>
         </Show>
+        </Show>
+      </Show>
+      <Show when={searchMode()}>
+        <div class="search-bar">
+          <input
+            type="text"
+            placeholder="Type to search"
+            class="cm-textfield"
+            value={searchQuery()}
+            onInput={(e) => {
+              const q = (e.currentTarget as HTMLInputElement).value;
+              setSearchQuery(q);
+              if (!q || q.trim().length < 2) { setResults([]); return; }
+              setSearching(true);
+              const root = props.root!;
+              invoke<Array<{ path: string; line?: number; col?: number; preview?: string }>>("search_all", { root, query: q, limit: 200 })
+                .then((r) => setResults(r))
+                .catch(() => setResults([]))
+                .finally(() => setSearching(false));
+            }}
+          />
+          <div class="search-status">{searching() ? "Searching..." : results().length + " results"}</div>
+        </div>
       </Show>
       <div class="sidebar-footer">
         <button
@@ -94,6 +144,25 @@ export function Sidebar(props: Props) {
           {/* Moon (crescent) icon */}
           <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
             <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" fill="currentColor"/>
+          </svg>
+        </button>
+        <button
+          type="button"
+          classList={{ icon: true, active: searchMode() }}
+          title={searchMode() ? "Close search" : "Search"}
+          aria-label="Toggle search"
+          onClick={() => {
+            setSearchMode(prev => {
+              const next = !prev;
+              if (!next) { setResults([]); setSearchQuery(""); }
+              return next;
+            });
+          }}
+        >
+          {/* Magnifying glass */}
+          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+            <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2" fill="none"/>
+            <line x1="16" y1="16" x2="21" y2="21" stroke="currentColor" stroke-width="2"/>
           </svg>
         </button>
         <button

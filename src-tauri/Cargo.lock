@@ -4087,6 +4087,7 @@ version = "0.1.0"
 dependencies = [
  "ignore",
  "notify",
+ "regex",
  "serde",
  "tauri",
  "tauri-build",

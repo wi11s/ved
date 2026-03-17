@@ -1,13 +1,11 @@
 # TO DO
 
 [ ] App Icon
-[ ] Cmd click variables/functions to navigate code
-[ ] Advanced scroll bar
-[ ] File review checkmark (revoke on file change)
-[ ] Find and relpace
-[ ] Multi-cursor
-[ ] Git command integration
-[ ] Claude prompt -> change mapping
-[ ] Vertical lines in sidebar
+[ ] Advanced scroll bar - Show changes, 
+[ ] Sidebar - File review checkmark (revoke on file change)
+[x] Find and relpace
+[x] Multi-cursor
 [ ] Keyboard shortcuts
 [ ] Show dir in the header
+[ ] Realtime status update after git terminal commands
+[ ] Files graph

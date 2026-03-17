@@ -2,7 +2,8 @@
 import { createMemo, createResource, createSignal, createEffect, onCleanup, onMount } from "solid-js";
 import { render } from "solid-js/web";
 import { invoke } from "@tauri-apps/api/core";
-import { listen } from "@tauri-apps/api/event";
+import { listen, emit } from "@tauri-apps/api/event";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import { Sidebar } from "./Sidebar";
 import { Editor } from "./Editor";
 import "./style.css";
@@ -37,6 +38,12 @@ function App() {
     const unlistenToggle = await listen("toggle-theme", () => {
       setTheme((t) => (t === "light" ? "dark" : "light"));
     });
+    const unlistenOpen = await listen<{ path: string; line?: number; col?: number }>("open-file", (e) => {
+      const { path, line, col } = e.payload as any;
+      setFile(path);
+      // After the editor mounts the file, ask it to reveal the target
+      setTimeout(() => { emit("reveal-pos", { path, line, col }); }, 50);
+    });
     // Keyboard shortcut: CmdOrCtrl+Shift+L
     const onKey = (e: KeyboardEvent) => {
       const isAccel = navigator.platform.includes("Mac") ? e.metaKey : e.ctrlKey;
@@ -46,13 +53,18 @@ function App() {
       }
     };
     window.addEventListener("keydown", onKey);
-    onCleanup(() => { unlisten(); unlistenToggle(); window.removeEventListener("keydown", onKey); clearTimeout(timer); });
+    onCleanup(() => { unlisten(); unlistenToggle(); unlistenOpen(); window.removeEventListener("keydown", onKey); clearTimeout(timer); });
   });
 
   createEffect(() => {
     const t = theme();
     document.documentElement.setAttribute("data-theme", t);
     localStorage.setItem("theme", t);
+  });
+
+  createEffect(() => {
+    const r = root();
+    getCurrentWindow().setTitle(r ?? "VSE");
   });
 
   function onSelect(path: string) { setFile(path); }
