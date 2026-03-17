@@ -413,7 +413,7 @@ export function Editor(props: Props) {
             onKeyDown={e => { if (e.key === "Enter") e.shiftKey ? searchPrev() : searchNext(); }}
           />
           <span class="find-count">
-            {searchMatches().length > 0 ? `${searchIndex() + 1} / ${searchMatches().length}` : searchQuery() ? "0" : ""}
+            {searchMatches().length > 0 ? `${searchIndex() + 1} / ${searchMatches().length}` : "0 / 0"}
           </span>
           <button onClick={searchPrev}>←</button>
           <button onClick={searchNext}>→</button>
