@@ -31,10 +31,9 @@ function App() {
     document.documentElement.setAttribute("data-theme", theme());
 
     let timer: ReturnType<typeof setTimeout> | undefined;
-    const unlisten = await listen("file-changed", () => {
-      clearTimeout(timer);
-      timer = setTimeout(() => refetchStatus(), 300);
-    });
+    const triggerStatusRefetch = () => { clearTimeout(timer); timer = setTimeout(() => refetchStatus(), 300); };
+    const unlisten = await listen("file-changed", triggerStatusRefetch);
+    const unlistenGit = await listen("git-changed", triggerStatusRefetch);
     const unlistenToggle = await listen("toggle-theme", () => {
       setTheme((t) => (t === "light" ? "dark" : "light"));
     });
@@ -53,7 +52,7 @@ function App() {
       }
     };
     window.addEventListener("keydown", onKey);
-    onCleanup(() => { unlisten(); unlistenToggle(); unlistenOpen(); window.removeEventListener("keydown", onKey); clearTimeout(timer); });
+    onCleanup(() => { unlisten(); unlistenGit(); unlistenToggle(); unlistenOpen(); window.removeEventListener("keydown", onKey); clearTimeout(timer); });
   });
 
   createEffect(() => {

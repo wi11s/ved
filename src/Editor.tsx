@@ -150,10 +150,18 @@ export function Editor(props: Props) {
   const [hoverInfo, setHoverInfo] = createSignal<HoverInfo | null>(null);
   let hoverTimer: ReturnType<typeof setTimeout> | undefined;
   let popupRef: HTMLDivElement | undefined;
+  let lastEditTime = 0;
 
   function closeHover() {
     clearTimeout(hoverTimer);
     setHoverInfo(null);
+  }
+
+  // Returns true if the word looks like a code identifier rather than prose/syntax.
+  // Matches: camelCase, PascalCase, snake_case, SCREAMING_SNAKE, or length >= 6.
+  function looksLikeIdentifier(word: string): boolean {
+    if (word.length < 3) return false;
+    return /_|[A-Z][a-z]|[a-z][A-Z]|[A-Z]{2,}|[0-9]/.test(word) || word.length >= 6;
   }
 
   // Reposition popup every time hoverInfo changes (initial show + when results arrive).
@@ -353,6 +361,7 @@ export function Editor(props: Props) {
             EditorView.domEventHandlers({ scroll() { closeHover(); return false; } }),
             EditorView.updateListener.of((update) => {
               if (update.docChanged) {
+                lastEditTime = Date.now();
                 clearTimeout(saveTimer);
                 saveTimer = setTimeout(() => {
                   const contentStr = update.state.doc.toString();
@@ -363,9 +372,11 @@ export function Editor(props: Props) {
               if (update.selectionSet) {
                 const cursor = update.state.selection.main;
                 if (!cursor.empty) { closeHover(); return; }
+                if (Date.now() - lastEditTime < 600) { closeHover(); return; }
                 const w = wordAt(update.state, cursor.head);
                 if (!w || w.to - w.from < 2) { closeHover(); return; }
                 const word = update.state.doc.sliceString(w.from, w.to);
+                if (!looksLikeIdentifier(word)) { closeHover(); return; }
                 if (hoverInfo()?.word === word) return;
                 closeHover();
                 const coords = update.view.coordsAtPos(w.from);

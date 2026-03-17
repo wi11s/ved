@@ -21,16 +21,27 @@ pub fn start(root: String, app: AppHandle) {
 
         for res in rx {
             if let Ok(event) = res {
+                let mut git_changed = false;
                 let paths: Vec<String> = event.paths
                     .iter()
-                    .filter(|p| {
-                        // Block files inside .git/ but allow .git itself (git init detection)
-                        !p.to_string_lossy().contains("/.git/")
+                    .filter_map(|p| {
+                        let s = p.to_string_lossy();
+                        if s.contains("/.git/") {
+                            let name = p.file_name().and_then(|n| n.to_str()).unwrap_or("");
+                            if matches!(name, "index" | "HEAD" | "MERGE_HEAD" | "CHERRY_PICK_HEAD") {
+                                git_changed = true;
+                            }
+                            None
+                        } else {
+                            Some(s.into_owned())
+                        }
                     })
-                    .map(|p| p.to_string_lossy().into_owned())
                     .collect();
                 if !paths.is_empty() {
                     app.emit("file-changed", paths).ok();
+                }
+                if git_changed {
+                    app.emit("git-changed", ()).ok();
                 }
             }
         }
