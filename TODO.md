@@ -11,4 +11,4 @@
 [x] Higher contrast sidebar colors. Green isn't visible on light and dark mode, and yellow isn't visible on light mode
 [ ] Files graph — interactive visual graph of the codebase (like dbdiagram.io); nodes are files/folders/functions/variables; edges show imports/dependencies; supports filters and collapsing; lightweight, read-only visualization
 [x] Floating search should disappear when new file is selected
-[ ] When text is highlighted, highlight matching text
+[x] When text is highlighted, highlight matching text

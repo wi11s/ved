@@ -2,7 +2,7 @@ import { For, Show, createEffect, createSignal, onCleanup, onMount } from "solid
 import { EditorView, keymap, highlightSpecialChars, drawSelection, dropCursor, crosshairCursor } from "@codemirror/view";
 import { history, defaultKeymap, historyKeymap } from "@codemirror/commands";
 import { closeBracketsKeymap, completionKeymap } from "@codemirror/autocomplete";
-import { SearchCursor, selectNextOccurrence } from "@codemirror/search";
+import { SearchCursor, selectNextOccurrence, highlightSelectionMatches } from "@codemirror/search";
 import { lintKeymap } from "@codemirror/lint";
 import { EditorState, StateEffect, StateField, RangeSetBuilder, type Extension } from "@codemirror/state";
 import { LanguageDescription, syntaxHighlighting } from "@codemirror/language";
@@ -344,6 +344,7 @@ export function Editor(props: Props) {
             syntaxHighlighting(classHighlighter),
             langExt,
             EditorView.lineWrapping,
+            highlightSelectionMatches(),
             decoField,
             matchHighlightField,
             EditorState.allowMultipleSelections.of(true),
