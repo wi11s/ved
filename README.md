@@ -1,4 +1,4 @@
-# VSE — Versioned Source Explorer
+# VED — Versioned Editor for Diffs
 
 A lightweight desktop app to explore, review, and lightly edit code. Great alongside terminal-first AI editors (Claude Code, Codex CLI, etc.). Read code, review diffs, make small edits — nothing more.
 
@@ -25,16 +25,6 @@ vse ~/my/repo  # open any path
 | Make a small edit | Click into editor; autosaves |
 | See changes inline | Adds/Deletes highlighted relative to HEAD |
 | Reload from disk | Automatic; prompts only for true external edits |
-
-## Out of Scope
-
-- No terminal, debugger, extensions, or plugins
-- No git write operations (commit, push, branch) — view only
-- No AI integration
-- No remote files (local only)
-- No split panes, multi-cursor, or advanced editing
-- No project management or notes
-- Minimal settings: light/dark mode
 
 ## Stack
 

@@ -44,7 +44,7 @@ export function Sidebar(props: Props) {
     return arr;
   });
 
-  return (
+return (
     <aside>
       <Show when={props.root} fallback={<p class="hint">Run: ide &lt;path&gt;</p>}>
         <Show when={searchMode()}>
@@ -71,27 +71,29 @@ export function Sidebar(props: Props) {
         </Show>
         <Show when={!searchMode()}>
         <Show when={!filterChanged()} fallback={
-          <ul>
-            <For each={changedList()}>
-              {(p) => {
-                const rel = (props.root && p.startsWith(props.root + "/")) ? p.slice((props.root + "/").length) : p;
-                const isCreated = props.createdFiles.has(p);
-                const isRemoved = props.removedFiles.has(p);
-                return (
-                  <li>
-                    <span
-                      class="file"
-                      classList={{ created: isCreated, removed: isRemoved, selected: p === props.selectedPath }}
-                      onClick={() => props.onSelect(p)}
-                      title={p}
-                    >
-                      {rel}
-                    </span>
-                  </li>
-                );
-              }}
-            </For>
-          </ul>
+          <>
+            <ul>
+              <For each={changedList()}>
+                {(p) => {
+                  const rel = (props.root && p.startsWith(props.root + "/")) ? p.slice((props.root + "/").length) : p;
+                  const isCreated = props.createdFiles.has(p);
+                  const isRemoved = props.removedFiles.has(p);
+                  return (
+                    <li>
+                      <span
+                        class="file"
+                        classList={{ dirty: !isCreated && !isRemoved, created: isCreated, removed: isRemoved, selected: p === props.selectedPath }}
+                        onClick={() => props.onSelect(p)}
+                        title={p}
+                      >
+                        {rel}
+                      </span>
+                    </li>
+                  );
+                }}
+              </For>
+            </ul>
+          </>
         }>
           <ul>
             <For each={nodes() ?? []}>

@@ -7,3 +7,5 @@
 [ ] Create/delete/rename files and folders in sidebar
 [ ] Sidebar colors should still be applied when filter is active
 [ ] Don't show self instance in floating search modal
+[ ] Enhance floatin search modal UX (hotkey to open, maybe a different hotkey to search, and one to see graph, or something like that).
+[ ] Review codemirror docs and make sure we are using optimal implementation

@@ -1,7 +1,7 @@
 [package]
-name = "vse"
+name = "ved"
 version = "0.1.0"
-description = "VSE — Versioned Source Explorer"
+description = "VED — Versioned Editor for Diffs"
 edition = "2021"
 
 ## No library target; single binary with main.rs
