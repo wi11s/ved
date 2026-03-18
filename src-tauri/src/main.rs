@@ -7,7 +7,7 @@ mod watch;
 mod search;
 
 use std::sync::Mutex;
-use tauri::menu::{Menu, MenuItem, Submenu};
+use tauri::menu::{Menu, MenuItem, PredefinedMenuItem, Submenu};
 use tauri::Emitter;
 
 pub struct RootPath(pub Mutex<Option<String>>);
@@ -25,10 +25,20 @@ fn main() {
     tauri::Builder::default()
         .manage(RootPath(Mutex::new(root)))
         .setup(move |app| {
-            // Build application menu with a View -> Toggle Theme item
+            // Edit menu: provides native copy/paste/undo to the WebView responder chain
+            let edit = Submenu::with_items(app, "Edit", true, &[
+                &PredefinedMenuItem::undo(app, None)?,
+                &PredefinedMenuItem::redo(app, None)?,
+                &PredefinedMenuItem::separator(app)?,
+                &PredefinedMenuItem::cut(app, None)?,
+                &PredefinedMenuItem::copy(app, None)?,
+                &PredefinedMenuItem::paste(app, None)?,
+                &PredefinedMenuItem::select_all(app, None)?,
+            ])?;
+            // View menu
             let toggle = MenuItem::with_id(app, "toggle-theme", "Toggle Theme", true, Some("CmdOrCtrl+Shift+L"))?;
             let view = Submenu::with_items(app, "View", true, &[&toggle])?;
-            let menu = Menu::with_items(app, &[&view])?;
+            let menu = Menu::with_items(app, &[&edit, &view])?;
             app.set_menu(menu)?;
 
             app.on_menu_event(move |app, event| {

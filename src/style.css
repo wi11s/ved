@@ -90,7 +90,7 @@ html, body { background: var(--bg); color: var(--fg); }
 
 #app {
   display: grid;
-  grid-template-columns: 220px 1fr;
+  grid-template-columns: 190px 1fr;
   height: 100vh;
   overflow: hidden;
 }
@@ -153,6 +153,78 @@ aside > ul { overflow-y: auto; flex: 1; }
 }
 .sidebar-footer button.icon:hover { background: var(--hover); }
 .sidebar-footer button.active { background: var(--hover); }
+/* File row: review checkmark sits absolutely inside the li, overlaying the right edge */
+aside li.file-row { position: relative; }
+aside li.file-row span.file { padding-right: 20px; } /* reserve space so text doesn't hide under check */
+.review-check {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--muted);
+  opacity: 0;
+  padding: 0;
+  font-size: 11px;
+  line-height: 1;
+  transition: opacity 0.1s, color 0.1s;
+}
+aside li.file-row:hover .review-check { opacity: 0.45; }
+.review-check.checked { opacity: 1 !important; color: var(--add-fg); }
+/* Shortcuts modal */
+.shortcuts-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.shortcuts-modal {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  min-width: 280px;
+  overflow: hidden;
+}
+.shortcuts-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  font-weight: 600;
+}
+.shortcuts-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1;
+  padding: 0 2px;
+}
+.shortcuts-close:hover { color: var(--fg); }
+.shortcuts-table { width: 100%; border-collapse: collapse; }
+.shortcuts-table td { padding: 6px 14px; }
+.shortcuts-table td:first-child { white-space: nowrap; width: 1%; padding-right: 20px; }
+.shortcuts-table tr:not(:last-child) td { border-bottom: 1px solid var(--border); }
+kbd {
+  display: inline-block;
+  background: var(--gutter-bg);
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 11px;
+  font-family: monospace;
+  line-height: 1.4;
+}
+kbd + kbd { margin-left: 3px; }
 /* Git status coloring for files */
 aside span.file.created { color: var(--add-fg); }
 aside span.file.removed { color: var(--del-fg); text-decoration: line-through; }

@@ -1,4 +1,4 @@
-import { createMemo, createResource, createSignal, For, Show, onCleanup, onMount } from "solid-js";
+import { createEffect, createMemo, createResource, createSignal, For, Show, onCleanup, onMount } from "solid-js";
 import { invoke } from "@tauri-apps/api/core";
 import { emit, listen } from "@tauri-apps/api/event";
 
@@ -20,14 +20,47 @@ export function Sidebar(props: Props) {
   const [searching, setSearching] = createSignal(false);
   const [results, setResults] = createSignal<Array<{ path: string; line?: number; col?: number; preview?: string }>>([]);
   const [refreshTick, setRefreshTick] = createSignal(0);
+  const [reviewed, setReviewed] = createSignal<Set<string>>(new Set());
+  const [showShortcuts, setShowShortcuts] = createSignal(false);
   const [nodes, { refetch: refetchRoot }] = createResource(
     () => props.root ?? undefined,
     (path) => invoke<FileNode[]>("read_dir", { path })
   );
 
+  // Load persisted review state when root becomes known
+  let loadedRoot: string | null = null;
+  createEffect(() => {
+    const root = props.root;
+    if (!root || root === loadedRoot) return;
+    loadedRoot = root;
+    try {
+      const saved = localStorage.getItem(`reviewed:${root}`);
+      if (saved) setReviewed(new Set(JSON.parse(saved)));
+    } catch { /* ignore corrupt data */ }
+  });
+
+  function saveReviewed(next: Set<string>) {
+    if (props.root) localStorage.setItem(`reviewed:${props.root}`, JSON.stringify([...next]));
+  }
+
+  function toggleReviewed(path: string) {
+    setReviewed(prev => {
+      const next = new Set(prev);
+      if (next.has(path)) next.delete(path); else next.add(path);
+      saveReviewed(next);
+      return next;
+    });
+  }
+
   onMount(async () => {
-    const unlisten = await listen("file-changed", () => {
-      // Refetch the root listing and bump tick so open subtrees refetch
+    const unlisten = await listen<string[]>("file-changed", (e) => {
+      const changed = e.payload;
+      setReviewed(prev => {
+        const next = new Set(prev);
+        for (const p of changed) next.delete(p);
+        saveReviewed(next);
+        return next;
+      });
       refetchRoot();
       setRefreshTick((t) => t + 1);
     });
@@ -83,7 +116,7 @@ return (
                   const isCreated = props.createdFiles.has(p);
                   const isRemoved = props.removedFiles.has(p);
                   return (
-                    <li>
+                    <li class="file-row">
                       <span
                         class="file"
                         classList={{ dirty: !isCreated && !isRemoved, created: isCreated, removed: isRemoved, selected: p === props.selectedPath }}
@@ -92,6 +125,13 @@ return (
                       >
                         {rel}
                       </span>
+                      <button
+                        type="button"
+                        class="review-check"
+                        classList={{ checked: reviewed().has(p) }}
+                        title={reviewed().has(p) ? "Mark unreviewed" : "Mark reviewed"}
+                        onClick={(e) => { e.stopPropagation(); toggleReviewed(p); }}
+                      >✓</button>
                     </li>
                   );
                 }}
@@ -110,6 +150,8 @@ return (
                   refreshTick={refreshTick()}
                   onSelect={props.onSelect}
                   selectedPath={props.selectedPath}
+                  reviewed={reviewed()}
+                  onToggleReviewed={toggleReviewed}
                 />
               )}
             </For>
@@ -185,7 +227,43 @@ return (
             <rect x="9" y="16" width="6" height="2" fill="currentColor"/>
           </svg>
         </button>
+        <button
+          type="button"
+          class="icon"
+          title="Keyboard shortcuts"
+          aria-label="Keyboard shortcuts"
+          onClick={() => setShowShortcuts(true)}
+        >
+          {/* Help / shortcuts icon */}
+          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3" stroke-linecap="round"/>
+            <circle cx="12" cy="17" r="0.5" fill="currentColor" stroke="none"/>
+          </svg>
+        </button>
       </div>
+      <Show when={showShortcuts()}>
+        <div class="shortcuts-overlay" onClick={() => setShowShortcuts(false)} onKeyDown={e => e.key === "Escape" && setShowShortcuts(false)}>
+          <div class="shortcuts-modal" onClick={e => e.stopPropagation()}>
+            <div class="shortcuts-header">
+              <span>Keyboard Shortcuts</span>
+              <button class="shortcuts-close" onClick={() => setShowShortcuts(false)}>×</button>
+            </div>
+            <table class="shortcuts-table">
+              <tbody>
+                <tr><td><kbd>⌘</kbd><kbd>F</kbd></td><td>Open find bar</td></tr>
+                <tr><td><kbd>Esc</kbd></td><td>Close find bar</td></tr>
+                <tr><td><kbd>Enter</kbd></td><td>Next match</td></tr>
+                <tr><td><kbd>⇧</kbd><kbd>Enter</kbd></td><td>Previous match</td></tr>
+                <tr><td><kbd>⌘</kbd><kbd>D</kbd></td><td>Select next occurrence</td></tr>
+                <tr><td><kbd>⌘</kbd><kbd>S</kbd></td><td>Save file</td></tr>
+                <tr><td><kbd>⌘</kbd><kbd>Z</kbd> / <kbd>⌘</kbd><kbd>⇧</kbd><kbd>Z</kbd></td><td>Undo / Redo</td></tr>
+                <tr><td><kbd>⌘</kbd><kbd>⇧</kbd><kbd>L</kbd></td><td>Toggle theme</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </Show>
     </aside>
   );
 }
@@ -212,6 +290,8 @@ function TreeNode(props: {
   refreshTick: number;
   onSelect: (path: string) => void;
   selectedPath?: string | null;
+  reviewed: Set<string>;
+  onToggleReviewed: (path: string) => void;
 }) {
   const [open, setOpen] = createSignal(false);
   const [children] = createResource(
@@ -220,7 +300,7 @@ function TreeNode(props: {
   );
 
   return (
-    <li>
+    <li class={props.node.is_dir ? undefined : "file-row"}>
       <span
         class={props.node.is_dir ? "dir" : "file"}
         classList={{
@@ -237,6 +317,15 @@ function TreeNode(props: {
         {props.node.is_dir ? (open() ? "▾ " : "▸ ") : "  "}
         {props.node.name}
       </span>
+      <Show when={!props.node.is_dir}>
+        <button
+          type="button"
+          class="review-check"
+          classList={{ checked: props.reviewed.has(props.node.path) }}
+          title={props.reviewed.has(props.node.path) ? "Mark unreviewed" : "Mark reviewed"}
+          onClick={(e) => { e.stopPropagation(); props.onToggleReviewed(props.node.path); }}
+        >✓</button>
+      </Show>
       <Show when={open()}>
         <ul>
           <For each={children() ?? []}>
@@ -249,6 +338,8 @@ function TreeNode(props: {
                 refreshTick={props.refreshTick}
                 onSelect={props.onSelect}
                 selectedPath={props.selectedPath}
+                reviewed={props.reviewed}
+                onToggleReviewed={props.onToggleReviewed}
               />
             )}
           </For>
