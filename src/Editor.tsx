@@ -382,11 +382,12 @@ export function Editor(props: Props) {
                 const coords = update.view.coordsAtPos(w.from);
                 if (!coords) return;
                 const currentRoot = root;
+                const currentLine = update.state.doc.lineAt(w.from).number;
                 hoverTimer = setTimeout(() => {
                   setHoverInfo({ word, left: coords.left, top: coords.top, bottom: coords.bottom, results: null });
                   if (!currentRoot) { setHoverInfo(h => h?.word === word ? { ...h, results: [] } : h); return; }
                   invoke<HoverResult[]>("search_all", { root: currentRoot, query: word, limit: 60 })
-                    .then(results => setHoverInfo(h => h?.word === word ? { ...h, results: results.filter(r => r.line != null) } : h))
+                    .then(results => setHoverInfo(h => h?.word === word ? { ...h, results: results.filter(r => r.line != null && !(r.path === file && r.line === currentLine)) } : h))
                     .catch(() => setHoverInfo(h => h?.word === word ? { ...h, results: [] } : h));
                 }, 300);
               }

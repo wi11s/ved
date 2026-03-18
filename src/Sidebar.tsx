@@ -53,9 +53,13 @@ return (
               {(hit) => {
                 const rel = (props.root && hit.path.startsWith(props.root + "/")) ? hit.path.slice((props.root + "/").length) : hit.path;
                 const title = hit.line ? `${rel}:${hit.line}` : rel;
+                const isCreated = props.createdFiles.has(hit.path);
+                const isRemoved = props.removedFiles.has(hit.path);
                 return (
                   <li>
-                    <span class="file" title={title}
+                    <span class="file"
+                      classList={{ dirty: !isCreated && !isRemoved && props.dirtyFiles.has(hit.path), created: isCreated, removed: isRemoved }}
+                      title={title}
                       onClick={async () => {
                         await emit("open-file", { path: hit.path, line: hit.line, col: hit.col || 1 });
                       }}
